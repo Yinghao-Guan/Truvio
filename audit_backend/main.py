@@ -104,7 +104,7 @@ def audit_citations(request: AuditRequest):
             if final_status == "REAL" and len(cit_year) == 4 and len(db_year) == 4:
                 if cit_year != db_year:
                     if int(db_year) > int(cit_year):
-                        explanation += f" (Note: Database lists a later version from {db_year}). Please double check."
+                        explanation += f" (Note: Database lists a later version from {db_year}, please double check)."
                     else:
                         final_status = "MINOR_ERROR"
                         explanation += f" Note: Year mismatch (Cited: {cit_year}, DB: {db_year})."
