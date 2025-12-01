@@ -144,7 +144,7 @@ export default function Home() {
 
     } catch (error) {
       console.error('API Error:', error);
-      alert('无法连接到审计服务器，请检查后端是否启动');
+      alert('Unable to connect to the audit server. Please check if the backend is running.');
     } finally {
       setLoading(false);
     }
