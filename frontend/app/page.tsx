@@ -1,17 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Clock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import HistoryDrawer, { HistoryItem, AuditResult } from '../components/HistoryDrawer';
 
-// Logo 组件 (保持不变)
+// Logo 组件
 function VeruLogo() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-      className="w-8 h-8 mr-2"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-8 h-8 mr-2">
       <defs>
         <linearGradient id="logo_grad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style={{ stopColor: '#2563EB', stopOpacity: 1 }} />
@@ -19,26 +16,9 @@ function VeruLogo() {
         </linearGradient>
       </defs>
       <rect width="512" height="512" rx="128" fill="url(#logo_grad)" />
-      <path
-        d="M140 200 L210 340 L380 140"
-        stroke="white"
-        strokeWidth="64"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M140 200 L210 340 L380 140" stroke="white" strokeWidth="64" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
-}
-
-// 审计卡片组件 (保持不变)
-interface AuditResult {
-  citation_text: string;
-  status: 'REAL' | 'FAKE' | 'MISMATCH' | 'UNVERIFIED' | 'SUSPICIOUS';
-  source: string;
-  confidence: number;
-  message: string;
-  metadata?: any;
 }
 
 function AuditCard({ result }: { result: AuditResult }) {
@@ -50,13 +30,14 @@ function AuditCard({ result }: { result: AuditResult }) {
         return { color: 'border-rose-500 bg-rose-50/30', icon: <AlertTriangle className="w-5 h-5 text-rose-600" />, text: 'text-rose-700' };
       case 'MISMATCH':
         return { color: 'border-amber-500 bg-amber-50/30', icon: <AlertCircle className="w-5 h-5 text-amber-600" />, text: 'text-amber-700' };
+      case 'MINOR_ERROR':
+        return { color: 'border-cyan-500 bg-cyan-50/30', icon: <AlertCircle className="w-5 h-5 text-cyan-600" />, text: 'text-cyan-700' };
       default:
         return { color: 'border-slate-300 bg-slate-50', icon: <AlertCircle className="w-5 h-5 text-slate-500" />, text: 'text-slate-600' };
     }
   };
-
+  // ... 后面的代码不变
   const config = getStatusConfig(result.status);
-
   return (
     <div className={`p-5 rounded-xl border-l-4 shadow-sm bg-white transition-all hover:shadow-md ${config.color}`}>
       <div className="flex items-start justify-between mb-3">
@@ -73,16 +54,13 @@ function AuditCard({ result }: { result: AuditResult }) {
             </div>
         )}
       </div>
-
       <div className="mb-4 text-sm font-medium text-slate-800 italic relative pl-4">
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-200 rounded-full"></div>
         "{result.citation_text.length > 120 ? result.citation_text.slice(0, 120) + '...' : result.citation_text}"
       </div>
-
       <div className="text-sm text-slate-600 leading-relaxed bg-white/60 p-3 rounded-lg border border-slate-100/50">
         <ReactMarkdown>{result.message}</ReactMarkdown>
       </div>
-
       {result.metadata?.title && (
          <div className="mt-4 pt-3 border-t border-slate-100 text-xs flex flex-col gap-1">
             <span className="text-slate-400 font-semibold uppercase tracking-wider text-[10px]">Source Match</span>
@@ -105,6 +83,44 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<AuditResult[] | null>(null);
 
+  // 历史记录相关状态
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  // 加载历史记录
+  useEffect(() => {
+    const saved = localStorage.getItem('veru_history');
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load history');
+      }
+    }
+  }, []);
+
+  // 保存历史记录的函数
+  const saveToHistory = (text: string, res: AuditResult[]) => {
+    const newItem: HistoryItem = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      inputText: text,
+      results: res
+    };
+
+    // 最多保存 20 条，新的在前
+    const newHistory = [newItem, ...history].slice(0, 20);
+    setHistory(newHistory);
+    localStorage.setItem('veru_history', JSON.stringify(newHistory));
+  };
+
+  const clearHistory = () => {
+    if (confirm('Are you sure you want to clear all history?')) {
+        setHistory([]);
+        localStorage.removeItem('veru_history');
+    }
+  };
+
   const handleAudit = async () => {
     if (!inputText.trim()) return;
     setLoading(true);
@@ -120,6 +136,12 @@ export default function Home() {
 
       const data = await response.json();
       setResults(data);
+
+      // ✅ 成功获取结果后，保存到历史
+      if (data && data.length > 0) {
+        saveToHistory(inputText, data);
+      }
+
     } catch (error) {
       console.error('API Error:', error);
       alert('无法连接到审计服务器，请检查后端是否启动');
@@ -130,18 +152,40 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-slate-800 font-sans flex flex-col">
+      {/* 历史记录侧边栏 */}
+      <HistoryDrawer
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        history={history}
+        onClear={clearHistory}
+        onSelect={(item) => {
+            setInputText(item.inputText);
+            setResults(item.results);
+        }}
+      />
+
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center cursor-pointer" onClick={() => window.location.reload()}>
             <VeruLogo />
             <span className="text-xl font-bold tracking-tight text-slate-900">Veru</span>
           </div>
-          <nav className="flex items-center space-x-6">
-            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors hidden sm:block">How it works</a>
-            <div className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
+          <nav className="flex items-center space-x-4">
+            <div className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 hidden sm:block">
               Free Research Preview
             </div>
+            {/* History Button */}
+            <button
+                onClick={() => setHistoryOpen(true)}
+                className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative"
+                title="View History"
+            >
+                <History className="w-5 h-5" />
+                {history.length > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                )}
+            </button>
           </nav>
         </div>
       </header>
@@ -150,7 +194,6 @@ export default function Home() {
       <main className="flex-1 w-full bg-gradient-to-b from-[#F8F9FA] to-white">
         <div className="max-w-7xl mx-auto px-6 py-10 lg:py-14">
 
-          {/* Hero Text */}
           <div className="text-center mb-10 max-w-2xl mx-auto">
             <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
               Verify Academic Citations <span className="text-blue-600">Instantly</span>
@@ -160,9 +203,7 @@ export default function Home() {
             </p>
           </div>
 
-          {/* The Tool (2-Column Layout) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 h-[600px] lg:h-[700px]">
-
             {/* Left: Input */}
             <div className="flex flex-col h-full">
               <div className="bg-white rounded-2xl shadow-lg border border-slate-200/60 p-1 flex-1 flex flex-col transition-all focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-400 overflow-hidden">
@@ -173,7 +214,6 @@ export default function Home() {
                     </label>
                     <span className="text-[10px] text-slate-400">Supports ChatGPT, Claude, Perplexity</span>
                 </div>
-
                 <textarea
                   className="flex-1 w-full p-6 bg-white outline-none resize-none font-mono text-sm leading-7 text-slate-700 placeholder:text-slate-300"
                   placeholder="Paste text here...
@@ -181,7 +221,6 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                 />
-
                 <div className="p-4 bg-white border-t border-slate-50 flex justify-between items-center">
                   <span className="text-xs text-slate-400">
                     {inputText.length} characters
@@ -230,11 +269,11 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
                         {loading && (
                             <div className="h-full flex flex-col items-center justify-center">
                             <div className="text-center space-y-6">
-                                <div className="relative mx-auto">
-                                <div className="w-16 h-16 border-4 border-blue-100 rounded-full animate-spin border-t-blue-600"></div>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-8 h-8 bg-blue-50 rounded-full"></div>
-                                </div>
+                                <div className="relative mx-auto w-16 h-16">
+                                    <div className="w-16 h-16 border-4 border-blue-100 rounded-full animate-spin border-t-blue-600"></div>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-8 h-8 bg-blue-50 rounded-full"></div>
+                                    </div>
                                 </div>
                                 <div>
                                     <p className="text-slate-600 font-medium">Running forensic analysis...</p>
@@ -260,19 +299,17 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
                     </div>
                 </div>
             </div>
-
           </div>
         </div>
       </main>
 
-      {/* Feature Section (Below the fold) */}
+      {/* Feature Section & Footer (保持不变) */}
       <section id="features" className="bg-white border-t border-slate-200 py-20">
         <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
                 <h2 className="text-3xl font-bold text-slate-900 mb-4">Why use Veru?</h2>
                 <p className="text-slate-500 max-w-2xl mx-auto">ChatGPT and other LLMs often hallucinate citations. Veru acts as your forensic auditor.</p>
             </div>
-
             <div className="grid md:grid-cols-3 gap-10">
                 <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-slate-50 transition-colors">
                     <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 text-blue-600">
@@ -305,7 +342,6 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
