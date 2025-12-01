@@ -50,7 +50,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2 text-indigo-700">
             <BookOpen className="w-6 h-6" />
-            <span className="text-xl font-bold tracking-tight">Truvio Audit</span>
+            <span className="text-xl font-bold tracking-tight">Veru</span>
           </div>
           <div className="text-sm text-slate-500">AI Hallucination Detector</div>
         </div>
