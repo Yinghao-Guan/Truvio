@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2 } from 'lucide-react';
+import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-// ✅ 更新：Logo 渐变色改为 "Blue-600" 到 "Cyan-500"
+// Logo 组件 (保持不变)
 function VeruLogo() {
   return (
     <svg
@@ -14,9 +14,7 @@ function VeruLogo() {
     >
       <defs>
         <linearGradient id="logo_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          {/* 起始色改为了 Tailwind Blue-600 (#2563EB) */}
           <stop offset="0%" style={{ stopColor: '#2563EB', stopOpacity: 1 }} />
-          {/* 结束色保持 Cyan-500 (#06B6D4) 增加层次感 */}
           <stop offset="100%" style={{ stopColor: '#06B6D4', stopOpacity: 1 }} />
         </linearGradient>
       </defs>
@@ -33,6 +31,7 @@ function VeruLogo() {
   );
 }
 
+// 审计卡片组件 (保持不变)
 interface AuditResult {
   citation_text: string;
   status: 'REAL' | 'FAKE' | 'MISMATCH' | 'UNVERIFIED' | 'SUSPICIOUS';
@@ -40,131 +39,6 @@ interface AuditResult {
   confidence: number;
   message: string;
   metadata?: any;
-}
-
-export default function Home() {
-  const [inputText, setInputText] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<AuditResult[] | null>(null);
-
-  const handleAudit = async () => {
-    if (!inputText.trim()) return;
-    setLoading(true);
-    setResults(null);
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-      const response = await fetch(`${apiUrl}/api/audit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputText }),
-      });
-
-      const data = await response.json();
-      setResults(data);
-    } catch (error) {
-      console.error('API Error:', error);
-      alert('无法连接到审计服务器，请检查后端是否启动');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-[#F8F9FA] text-slate-800 font-sans">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center">
-            <VeruLogo />
-            <span className="text-xl font-bold tracking-tight text-slate-900">Veru</span>
-          </div>
-          <div className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-            AI Citation Auditor
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-4rem)]">
-
-        {/* Left Column: Input */}
-        <div className="flex flex-col space-y-4">
-          {/* ✅ 更新：Focus ring 改为 blue */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex-1 flex flex-col transition-all focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-300">
-            <label className="text-sm font-semibold text-slate-700 mb-3 flex items-center">
-              {/* ✅ 更新：Icon 颜色改为 blue */}
-              <Search className="w-4 h-4 mr-2 text-blue-500" />
-              Source Text (Paste ChatGPT response here)
-            </label>
-            <textarea
-              className="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-lg outline-none resize-none font-mono text-sm leading-relaxed text-slate-700 placeholder:text-slate-400 focus:bg-white transition-colors"
-              placeholder="Example: 'Smith (2023) argues that...'"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-            />
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={handleAudit}
-                disabled={loading || !inputText}
-                // ✅ 更新：按钮背景改为 blue
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md active:transform active:scale-95"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  'Start Audit'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Results */}
-        <div className="flex flex-col space-y-4 overflow-y-auto pb-10">
-
-          {!results && !loading && (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                {/* ✅ 更新：图标颜色改为 blue-200 */}
-                <BookOpen className="w-8 h-8 text-blue-200" />
-              </div>
-              <p className="font-medium text-slate-500">Ready to audit</p>
-              <p className="text-sm text-slate-400 mt-1">Paste text on the left to begin</p>
-            </div>
-          )}
-
-          {loading && (
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="relative">
-                  {/* ✅ 更新：Loading 动画改为 blue */}
-                  <div className="w-12 h-12 border-4 border-blue-100 rounded-full animate-spin border-t-blue-600"></div>
-                </div>
-                <p className="text-slate-500 text-sm font-medium animate-pulse">Running forensic analysis...</p>
-              </div>
-            </div>
-          )}
-
-          {results && results.length === 0 && (
-             <div className="p-4 rounded-lg bg-orange-50 border border-orange-100 text-orange-800 flex items-start">
-                <AlertTriangle className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
-                <div>
-                    <p className="font-semibold text-sm">No citations detected</p>
-                    <p className="text-xs mt-1 text-orange-700/80">Try pasting a text that contains references like "Author (Year)" or "Title by Author".</p>
-                </div>
-             </div>
-          )}
-
-          {results && results.map((res, idx) => (
-            <AuditCard key={idx} result={res} />
-          ))}
-        </div>
-      </main>
-    </div>
-  );
 }
 
 function AuditCard({ result }: { result: AuditResult }) {
@@ -215,7 +89,6 @@ function AuditCard({ result }: { result: AuditResult }) {
             <div className="text-slate-700 font-medium">
                {result.metadata.title} ({result.metadata.year})
             </div>
-            {/* ✅ 更新：链接 hover 颜色改为 blue */}
             {result.metadata.oa_url && (
                 <a href={result.metadata.oa_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline mt-1 inline-flex items-center transition-colors">
                     View Full Text <span className="ml-1">→</span>
@@ -223,6 +96,227 @@ function AuditCard({ result }: { result: AuditResult }) {
             )}
          </div>
       )}
+    </div>
+  );
+}
+
+export default function Home() {
+  const [inputText, setInputText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<AuditResult[] | null>(null);
+
+  const handleAudit = async () => {
+    if (!inputText.trim()) return;
+    setLoading(true);
+    setResults(null);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${apiUrl}/api/audit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: inputText }),
+      });
+
+      const data = await response.json();
+      setResults(data);
+    } catch (error) {
+      console.error('API Error:', error);
+      alert('无法连接到审计服务器，请检查后端是否启动');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8F9FA] text-slate-800 font-sans flex flex-col">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center cursor-pointer" onClick={() => window.location.reload()}>
+            <VeruLogo />
+            <span className="text-xl font-bold tracking-tight text-slate-900">Veru</span>
+          </div>
+          <nav className="flex items-center space-x-6">
+            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors hidden sm:block">How it works</a>
+            <div className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
+              Free Research Preview
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      {/* Main Tool Section */}
+      <main className="flex-1 w-full bg-gradient-to-b from-[#F8F9FA] to-white">
+        <div className="max-w-7xl mx-auto px-6 py-10 lg:py-14">
+
+          {/* Hero Text */}
+          <div className="text-center mb-10 max-w-2xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
+              Verify Academic Citations <span className="text-blue-600">Instantly</span>
+            </h1>
+            <p className="text-slate-500 text-lg">
+              Don't let AI hallucinations ruin your research. Paste your text below to audit citations against real academic databases.
+            </p>
+          </div>
+
+          {/* The Tool (2-Column Layout) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 h-[600px] lg:h-[700px]">
+
+            {/* Left: Input */}
+            <div className="flex flex-col h-full">
+              <div className="bg-white rounded-2xl shadow-lg border border-slate-200/60 p-1 flex-1 flex flex-col transition-all focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-400 overflow-hidden">
+                <div className="bg-slate-50/50 border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center">
+                    <Search className="w-3.5 h-3.5 mr-2 text-blue-500" />
+                    Input Source
+                    </label>
+                    <span className="text-[10px] text-slate-400">Supports ChatGPT, Claude, Perplexity</span>
+                </div>
+
+                <textarea
+                  className="flex-1 w-full p-6 bg-white outline-none resize-none font-mono text-sm leading-7 text-slate-700 placeholder:text-slate-300"
+                  placeholder="Paste text here...
+Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                />
+
+                <div className="p-4 bg-white border-t border-slate-50 flex justify-between items-center">
+                  <span className="text-xs text-slate-400">
+                    {inputText.length} characters
+                  </span>
+                  <button
+                    onClick={handleAudit}
+                    disabled={loading || !inputText}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-xl active:scale-95"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Auditing...
+                      </>
+                    ) : (
+                      'Check Citations'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Results */}
+            <div className="flex flex-col h-full overflow-hidden">
+                <div className="bg-slate-50 rounded-2xl border border-slate-200 flex-1 flex flex-col overflow-hidden relative">
+                    <div className="bg-white/80 backdrop-blur border-b border-slate-200 px-4 py-3 flex items-center">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center">
+                        <ShieldCheck className="w-3.5 h-3.5 mr-2 text-emerald-500" />
+                        Audit Report
+                        </label>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        {!results && !loading && (
+                            <div className="h-full flex flex-col items-center justify-center text-slate-400 p-8 text-center">
+                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6 border border-slate-100">
+                                <BookOpen className="w-10 h-10 text-blue-200" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-slate-600 mb-2">Ready to verify</h3>
+                            <p className="text-sm text-slate-400 max-w-xs mx-auto">
+                                Paste any academic text on the left. Veru will cross-reference citations against 250M+ real papers.
+                            </p>
+                            </div>
+                        )}
+
+                        {loading && (
+                            <div className="h-full flex flex-col items-center justify-center">
+                            <div className="text-center space-y-6">
+                                <div className="relative mx-auto">
+                                <div className="w-16 h-16 border-4 border-blue-100 rounded-full animate-spin border-t-blue-600"></div>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-8 h-8 bg-blue-50 rounded-full"></div>
+                                </div>
+                                </div>
+                                <div>
+                                    <p className="text-slate-600 font-medium">Running forensic analysis...</p>
+                                    <p className="text-slate-400 text-xs mt-2">Connecting to OpenAlex & Google Search</p>
+                                </div>
+                            </div>
+                            </div>
+                        )}
+
+                        {results && results.length === 0 && (
+                            <div className="p-4 rounded-xl bg-orange-50 border border-orange-100 text-orange-800 flex items-start">
+                                <AlertTriangle className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-semibold text-sm">No citations detected</p>
+                                    <p className="text-xs mt-1 text-orange-700/80">Try pasting a text that contains references like "Author (Year)" or "Title by Author".</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {results && results.map((res, idx) => (
+                            <AuditCard key={idx} result={res} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+          </div>
+        </div>
+      </main>
+
+      {/* Feature Section (Below the fold) */}
+      <section id="features" className="bg-white border-t border-slate-200 py-20">
+        <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-16">
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">Why use Veru?</h2>
+                <p className="text-slate-500 max-w-2xl mx-auto">ChatGPT and other LLMs often hallucinate citations. Veru acts as your forensic auditor.</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-10">
+                <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-slate-50 transition-colors">
+                    <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 text-blue-600">
+                        <Database className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-3">Real Database Check</h3>
+                    <p className="text-slate-500 leading-relaxed">
+                        We cross-reference every citation against <strong>OpenAlex</strong>, a massive database of 250 million+ academic works.
+                    </p>
+                </div>
+                <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-slate-50 transition-colors">
+                    <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6 text-emerald-600">
+                        <ShieldCheck className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-3">Anti-Hallucination</h3>
+                    <p className="text-slate-500 leading-relaxed">
+                        Our "Auditor" AI compares the user's claim against the <strong>actual abstract</strong> to detect mismatched or fake summaries.
+                    </p>
+                </div>
+                <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-slate-50 transition-colors">
+                    <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-6 text-amber-600">
+                        <Globe className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-3">Google Grounding</h3>
+                    <p className="text-slate-500 leading-relaxed">
+                        If a paper isn't in the database, we use <strong>Google Search</strong> to perform a final forensic sweep of the web.
+                    </p>
+                </div>
+            </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-2 mb-4 md:mb-0">
+                <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-md flex items-center justify-center text-white font-bold text-xs">V</div>
+                <span className="font-bold text-slate-100 tracking-tight">Veru</span>
+            </div>
+            <div className="text-sm">
+                &copy; {new Date().getFullYear()} Veru Audit. All rights reserved.
+            </div>
+        </div>
+      </footer>
     </div>
   );
 }
