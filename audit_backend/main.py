@@ -1,9 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
 import re
+
+# 👇 引入限流库
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Import Services
 from services.llm_extractor import extract_citations_from_text
@@ -12,16 +17,30 @@ from services.google_search import verify_with_google_search
 from services.auditor import verify_content_consistency
 from services.semantic_scholar import search_paper_on_semantic_scholar
 
+# 👇 初始化限流器 (基于请求者的 IP 地址)
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(title="Veru Audit Engine")
+
+# 👇 将限流器挂载到 App
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# CORS 配置
+origins = [
+    "http://localhost:3000",
+    "https://veru.app",
+    "https://www.veru.app",
+    "https://truvio.vercel.app",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
-
 
 class AuditRequest(BaseModel):
     text: str
@@ -42,8 +61,16 @@ def get_clean_year(year_val):
 
 
 @app.post("/api/audit", response_model=List[AuditResult])
-def audit_citations(request: AuditRequest):
-    citations = extract_citations_from_text(request.text)
+@limiter.limit("10/minute")
+def audit_citations(request: Request, body: AuditRequest):  # 👈 修改这里
+    """
+    request: 必须叫这个名字，且类型为 Request，供 slowapi 获取 IP 使用。
+    body: 你的 Pydantic 模型，FastAPI 会自动把 JSON 里的内容放进来。
+    """
+
+    # 👇 这里也要改，从 body 中获取 text
+    citations = extract_citations_from_text(body.text)
+
     results = []
 
     for cit in citations:
