@@ -1,4 +1,4 @@
-# Veru (formerly Truvio)
+# Veru
 
 <div align="center">
   <img src="frontend/public/v_logo.svg" alt="Veru Logo" width="120" height="120" />
