@@ -20,6 +20,11 @@ LLMs like ChatGPT often hallucinate academic citations—inventing papers that s
 
 It extracts citations from your text and cross-references them against massive academic databases to verify their existence and content accuracy.
 
+### Demo
+<div align="center">
+  <img src="docs/images/demo.gif" alt="Veru Demo" width="100%" />
+</div>
+
 ### Key Features
 
 * **🕵️‍♂️ Anti-Hallucination Extraction**: Uses Gemini 2.0 to strictly extract citations without "autocorrecting" user errors.
@@ -29,6 +34,23 @@ It extracts citations from your text and cross-references them against massive a
     * **Tier 3**: Final forensic sweep using **Google Search Grounding**.
 * **🧠 Content Consistency Check**: Compares the user's claim against the *actual* abstract to detect mismatched summaries ("stitched" hallucinations).
 * **💾 Local History**: Automatically saves your audit sessions locally (no login required).
+
+### 🧠 How It Works (The Audit Pipeline)
+
+```mermaid
+graph TD
+    A[User Input] --> B(LLM Extraction)
+    B --> C{OpenAlex Search}
+    C -->|Found & High Confidence| D[✅ Verfied Real]
+    C -->|Not Found| E{Semantic Scholar}
+    E -->|Found| D
+    E -->|Not Found| F{Google Search Grounding}
+    F -->|Verified| D
+    F -->|Hallucinated| G[🛑 MARK AS FAKE]
+    D --> H[Content Consistency Check]
+    H -->|Match| I[Final Output]
+    H -->|Mismatch| J[⚠️ Content Warning]
+```
 
 ## 🛠 Tech Stack
 
@@ -106,3 +128,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 * [OpenAlex](https://openalex.org/) for their incredible open data.
 * [Semantic Scholar](https://www.semanticscholar.org/) for the academic graph API.
 * [Google Gemini](https://deepmind.google/technologies/gemini/) for the reasoning engine.
+
+If you find this project interesting, please give it a ⭐️ on GitHub! It helps a lot.
