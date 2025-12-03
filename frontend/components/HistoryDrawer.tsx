@@ -2,9 +2,8 @@
 
 import { X, Clock, Trash2, ArrowRight } from 'lucide-react';
 import { useEffect } from 'react';
+import { Translation } from '../translations'; // 引入类型定义
 
-// ✅ 修复 1: 添加 export 关键字，允许其他文件导入
-// ✅ 修复 2: 在 status 中加入 'MINOR_ERROR'
 export interface AuditResult {
   citation_text: string;
   status: 'REAL' | 'FAKE' | 'MISMATCH' | 'UNVERIFIED' | 'SUSPICIOUS' | 'MINOR_ERROR';
@@ -27,10 +26,10 @@ interface HistoryDrawerProps {
   onSelect: (item: HistoryItem) => void;
   history: HistoryItem[];
   onClear: () => void;
+  t: Translation; // ✅ 新增：接收翻译字典
 }
 
-export default function HistoryDrawer({ isOpen, onClose, onSelect, history, onClear }: HistoryDrawerProps) {
-  // 处理点击外部关闭
+export default function HistoryDrawer({ isOpen, onClose, onSelect, history, onClear, t }: HistoryDrawerProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -43,18 +42,16 @@ export default function HistoryDrawer({ isOpen, onClose, onSelect, history, onCl
 
   return (
     <>
-      {/* 遮罩层 */}
       <div
         className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
 
-      {/* 侧边栏 */}
       <div className="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out border-l border-slate-200 flex flex-col">
         <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <div className="flex items-center space-x-2 text-slate-700">
             <Clock className="w-5 h-5 text-blue-600" />
-            <span className="font-bold text-lg">Audit History</span>
+            <span className="font-bold text-lg">{t.historyTitle}</span>
           </div>
           <button
             onClick={onClose}
@@ -68,8 +65,8 @@ export default function HistoryDrawer({ isOpen, onClose, onSelect, history, onCl
           {history.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 text-center p-6">
               <Clock className="w-12 h-12 mb-3 opacity-20" />
-              <p>No history yet</p>
-              <p className="text-xs mt-1">Your recent audits will appear here</p>
+              <p>{t.noHistoryTitle}</p>
+              <p className="text-xs mt-1">{t.noHistoryDesc}</p>
             </div>
           ) : (
             history.map((item) => (
@@ -92,11 +89,11 @@ export default function HistoryDrawer({ isOpen, onClose, onSelect, history, onCl
                 </p>
                 <div className="mt-3 flex items-center space-x-2">
                   <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">
-                    {item.results.length} citations
+                    {item.results.length} {t.citationsCount}
                   </span>
                   {item.results.some(r => r.status === 'FAKE') && (
                     <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full border border-rose-100 font-bold">
-                      FAKE DETECTED
+                      {t.fakeDetected}
                     </span>
                   )}
                 </div>
@@ -112,7 +109,7 @@ export default function HistoryDrawer({ isOpen, onClose, onSelect, history, onCl
               className="w-full flex items-center justify-center space-x-2 text-rose-600 hover:bg-rose-50 p-3 rounded-lg text-sm font-medium transition-colors"
             >
               <Trash2 className="w-4 h-4" />
-              <span>Clear History</span>
+              <span>{t.clearHistory}</span>
             </button>
           </div>
         )}

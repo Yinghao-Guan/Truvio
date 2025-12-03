@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Clock, Github } from 'lucide-react';
+import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Languages } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import HistoryDrawer, { HistoryItem, AuditResult } from '../components/HistoryDrawer';
+import { translations, Language } from '../translations'; // 引入字典
 
 // Logo 组件
 function VeruLogo() {
@@ -21,36 +22,35 @@ function VeruLogo() {
   );
 }
 
-function AuditCard({ result }: { result: AuditResult }) {
+// 审计卡片组件 (增加 t 参数用于汉化 status)
+function AuditCard({ result, t }: { result: AuditResult, t: typeof translations.en }) {
   const getStatusConfig = (status: string) => {
     switch (status) {
-      case 'REAL':
-        return { color: 'border-emerald-500 bg-emerald-50/30', icon: <CheckCircle className="w-5 h-5 text-emerald-600" />, text: 'text-emerald-700' };
-      case 'FAKE':
-        return { color: 'border-rose-500 bg-rose-50/30', icon: <AlertTriangle className="w-5 h-5 text-rose-600" />, text: 'text-rose-700' };
-      case 'MISMATCH':
-        return { color: 'border-amber-500 bg-amber-50/30', icon: <AlertCircle className="w-5 h-5 text-amber-600" />, text: 'text-amber-700' };
-      case 'MINOR_ERROR':
-        return { color: 'border-cyan-500 bg-cyan-50/30', icon: <AlertCircle className="w-5 h-5 text-cyan-600" />, text: 'text-cyan-700' };
-      default:
-        return { color: 'border-slate-300 bg-slate-50', icon: <AlertCircle className="w-5 h-5 text-slate-500" />, text: 'text-slate-600' };
+      case 'REAL': return { color: 'border-emerald-500 bg-emerald-50/30', icon: <CheckCircle className="w-5 h-5 text-emerald-600" />, text: 'text-emerald-700' };
+      case 'FAKE': return { color: 'border-rose-500 bg-rose-50/30', icon: <AlertTriangle className="w-5 h-5 text-rose-600" />, text: 'text-rose-700' };
+      case 'MISMATCH': return { color: 'border-amber-500 bg-amber-50/30', icon: <AlertCircle className="w-5 h-5 text-amber-600" />, text: 'text-amber-700' };
+      case 'MINOR_ERROR': return { color: 'border-cyan-500 bg-cyan-50/30', icon: <AlertCircle className="w-5 h-5 text-cyan-600" />, text: 'text-cyan-700' };
+      default: return { color: 'border-slate-300 bg-slate-50', icon: <AlertCircle className="w-5 h-5 text-slate-500" />, text: 'text-slate-600' };
     }
   };
-  // ... 后面的代码不变
   const config = getStatusConfig(result.status);
+
+  // 获取本地化的 Status 文本
+  const localizedStatus = t.status[result.status as keyof typeof t.status] || result.status;
+
   return (
     <div className={`p-5 rounded-xl border-l-4 shadow-sm bg-white transition-all hover:shadow-md ${config.color}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-2">
           {config.icon}
-          <span className={`font-bold text-sm tracking-wide uppercase ${config.text}`}>{result.status}</span>
+          <span className={`font-bold text-sm tracking-wide uppercase ${config.text}`}>{localizedStatus}</span>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-slate-100 text-slate-500 font-medium uppercase tracking-wider">
             {result.source}
           </span>
         </div>
         {result.confidence > 0 && (
             <div className="text-xs text-slate-400 font-mono" title="AI Confidence Score">
-                {Math.round(result.confidence * 100)}% Conf.
+                {Math.round(result.confidence * 100)}% {t.confidence}
             </div>
         )}
       </div>
@@ -63,13 +63,13 @@ function AuditCard({ result }: { result: AuditResult }) {
       </div>
       {result.metadata?.title && (
          <div className="mt-4 pt-3 border-t border-slate-100 text-xs flex flex-col gap-1">
-            <span className="text-slate-400 font-semibold uppercase tracking-wider text-[10px]">Source Match</span>
+            <span className="text-slate-400 font-semibold uppercase tracking-wider text-[10px]">{t.sourceMatch}</span>
             <div className="text-slate-700 font-medium">
                {result.metadata.title} ({result.metadata.year})
             </div>
             {result.metadata.oa_url && (
                 <a href={result.metadata.oa_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline mt-1 inline-flex items-center transition-colors">
-                    View Full Text <span className="ml-1">→</span>
+                    {t.viewFullText} <span className="ml-1">→</span>
                 </a>
             )}
          </div>
@@ -83,11 +83,27 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<AuditResult[] | null>(null);
 
-  // 历史记录相关状态
+  // 语言状态
+  const [lang, setLang] = useState<Language>('en');
+  const t = translations[lang]; // 获取当前语言的字典
+
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  // 加载历史记录
+  // 自动检测语言
+  useEffect(() => {
+    // 仅在首次加载时检测
+    const browserLang = navigator.language.toLowerCase();
+    if (browserLang.startsWith('zh')) {
+      setLang('zh');
+    }
+  }, []);
+
+  // 切换语言函数
+  const toggleLanguage = () => {
+    setLang(prev => prev === 'en' ? 'zh' : 'en');
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem('veru_history');
     if (saved) {
@@ -99,7 +115,6 @@ export default function Home() {
     }
   }, []);
 
-  // 保存历史记录的函数
   const saveToHistory = (text: string, res: AuditResult[]) => {
     const newItem: HistoryItem = {
       id: Date.now().toString(),
@@ -107,8 +122,6 @@ export default function Home() {
       inputText: text,
       results: res
     };
-
-    // 最多保存 20 条，新的在前
     const newHistory = [newItem, ...history].slice(0, 20);
     setHistory(newHistory);
     localStorage.setItem('veru_history', JSON.stringify(newHistory));
@@ -137,7 +150,6 @@ export default function Home() {
       const data = await response.json();
       setResults(data);
 
-      // ✅ 成功获取结果后，保存到历史
       if (data && data.length > 0) {
         saveToHistory(inputText, data);
       }
@@ -150,38 +162,14 @@ export default function Home() {
     }
   };
 
-  // 定义结构化数据
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    'name': 'Veru',
-    'applicationCategory': 'EducationalApplication',
-    'operatingSystem': 'Web',
-    'offers': {
-      '@type': 'Offer',
-      'price': '0',
-      'priceCurrency': 'USD'
-    },
-    'description': 'An AI hallucination detection tool that verifies academic citations generated by LLMs against real databases like OpenAlex.',
-    'aggregateRating': {
-      '@type': 'AggregateRating',
-      'ratingValue': '4.8',
-      'ratingCount': '24'
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-slate-800 font-sans flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      {/* 历史记录侧边栏 */}
       <HistoryDrawer
         isOpen={historyOpen}
         onClose={() => setHistoryOpen(false)}
         history={history}
         onClear={clearHistory}
+        t={t} // 传递翻译字典
         onSelect={(item) => {
             setInputText(item.inputText);
             setResults(item.results);
@@ -195,11 +183,24 @@ export default function Home() {
             <VeruLogo />
             <span className="text-xl font-bold tracking-tight text-slate-900">Veru</span>
           </div>
-          <nav className="flex items-center space-x-4">
+          <nav className="flex items-center space-x-3">
+            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors hidden sm:block">
+              {t.howItWorks}
+            </a>
             <div className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 hidden sm:block">
-              Free Research Preview
+              {t.previewBadge}
             </div>
-            {/* History Button */}
+
+            {/* 语言切换按钮 */}
+            <button
+              onClick={toggleLanguage}
+              className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-1 font-medium text-sm"
+              title="Switch Language"
+            >
+              <Languages className="w-4 h-4" />
+              <span>{lang === 'en' ? 'EN' : '中文'}</span>
+            </button>
+
             <button
                 onClick={() => setHistoryOpen(true)}
                 className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors relative"
@@ -214,16 +215,15 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Tool Section */}
       <main className="flex-1 w-full bg-gradient-to-b from-[#F8F9FA] to-white">
         <div className="max-w-7xl mx-auto px-6 py-10 lg:py-14">
 
           <div className="text-center mb-10 max-w-2xl mx-auto">
             <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
-              Verify Academic Citations <span className="text-blue-600">Instantly</span>
+              {t.heroTitle} <span className="text-blue-600">{t.heroTitleHighlight}</span>
             </h1>
             <p className="text-slate-500 text-lg">
-              Don't let AI hallucinations ruin your research. Paste your text below to audit citations against real academic databases.
+              {t.heroDesc}
             </p>
           </div>
 
@@ -234,20 +234,21 @@ export default function Home() {
                 <div className="bg-slate-50/50 border-b border-slate-100 px-4 py-3 flex items-center justify-between">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center">
                     <Search className="w-3.5 h-3.5 mr-2 text-blue-500" />
-                    Input Source
+                    {t.inputLabel}
                     </label>
-                    <span className="text-[10px] text-slate-400">Supports ChatGPT, Claude, Perplexity</span>
+                    <span className="text-[10px] text-slate-400">{t.inputSubLabel}</span>
                 </div>
+
                 <textarea
                   className="flex-1 w-full p-6 bg-white outline-none resize-none font-mono text-sm leading-7 text-slate-700 placeholder:text-slate-300"
-                  placeholder="Paste text here...
-Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
+                  placeholder={t.placeholder}
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                 />
+
                 <div className="p-4 bg-white border-t border-slate-50 flex justify-between items-center">
                   <span className="text-xs text-slate-400">
-                    {inputText.length} characters
+                    {inputText.length} {t.charCount}
                   </span>
                   <button
                     onClick={handleAudit}
@@ -257,10 +258,10 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
                     {loading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Auditing...
+                        {t.verifyingBtn}
                       </>
                     ) : (
-                      'Check Citations'
+                      t.checkBtn
                     )}
                   </button>
                 </div>
@@ -273,7 +274,7 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
                     <div className="bg-white/80 backdrop-blur border-b border-slate-200 px-4 py-3 flex items-center">
                         <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center">
                         <ShieldCheck className="w-3.5 h-3.5 mr-2 text-emerald-500" />
-                        Audit Report
+                        {t.reportLabel}
                         </label>
                     </div>
 
@@ -283,9 +284,9 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
                             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6 border border-slate-100">
                                 <BookOpen className="w-10 h-10 text-blue-200" />
                             </div>
-                            <h3 className="text-lg font-semibold text-slate-600 mb-2">Ready to verify</h3>
+                            <h3 className="text-lg font-semibold text-slate-600 mb-2">{t.readyTitle}</h3>
                             <p className="text-sm text-slate-400 max-w-xs mx-auto">
-                                Paste any academic text on the left. Veru will cross-reference citations against 250M+ real papers.
+                                {t.readyDesc}
                             </p>
                             </div>
                         )}
@@ -300,8 +301,8 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
                                     </div>
                                 </div>
                                 <div>
-                                    <p className="text-slate-600 font-medium">Running forensic analysis...</p>
-                                    <p className="text-slate-400 text-xs mt-2">Connecting to OpenAlex & Google Search</p>
+                                    <p className="text-slate-600 font-medium">{t.processingTitle}</p>
+                                    <p className="text-slate-400 text-xs mt-2">{t.processingDesc}</p>
                                 </div>
                             </div>
                             </div>
@@ -311,56 +312,52 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
                             <div className="p-4 rounded-xl bg-orange-50 border border-orange-100 text-orange-800 flex items-start">
                                 <AlertTriangle className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <p className="font-semibold text-sm">No citations detected</p>
-                                    <p className="text-xs mt-1 text-orange-700/80">Try pasting a text that contains references like "Author (Year)" or "Title by Author".</p>
+                                    <p className="font-semibold text-sm">{t.noCitationsTitle}</p>
+                                    <p className="text-xs mt-1 text-orange-700/80">{t.noCitationsDesc}</p>
                                 </div>
                             </div>
                         )}
 
                         {results && results.map((res, idx) => (
-                            <AuditCard key={idx} result={res} />
+                            <AuditCard key={idx} result={res} t={t} /> // 传入翻译字典
                         ))}
                     </div>
                 </div>
             </div>
+
           </div>
         </div>
       </main>
 
-      {/* Feature Section & Footer (保持不变) */}
+      {/* Feature Section (Below the fold) */}
       <section id="features" className="bg-white border-t border-slate-200 py-20">
         <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold text-slate-900 mb-4">Why use Veru?</h2>
-                <p className="text-slate-500 max-w-2xl mx-auto">ChatGPT and other LLMs often hallucinate citations. Veru acts as your forensic auditor.</p>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">{t.whyTitle}</h2>
+                <p className="text-slate-500 max-w-2xl mx-auto">{t.whyDesc}</p>
             </div>
+
             <div className="grid md:grid-cols-3 gap-10">
                 <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-slate-50 transition-colors">
                     <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 text-blue-600">
                         <Database className="w-7 h-7" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-3">Real Database Check</h3>
-                    <p className="text-slate-500 leading-relaxed">
-                        We cross-reference every citation against <strong>OpenAlex</strong>, a massive database of 250 million+ academic works.
-                    </p>
+                    <h3 className="text-xl font-bold text-slate-900 mb-3">{t.feat1Title}</h3>
+                    <p className="text-slate-500 leading-relaxed" dangerouslySetInnerHTML={{ __html: t.feat1Desc }} />
                 </div>
                 <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-slate-50 transition-colors">
                     <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6 text-emerald-600">
                         <ShieldCheck className="w-7 h-7" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-3">Anti-Hallucination</h3>
-                    <p className="text-slate-500 leading-relaxed">
-                        Our "Auditor" AI compares the user's claim against the <strong>actual abstract</strong> to detect mismatched or fake summaries.
-                    </p>
+                    <h3 className="text-xl font-bold text-slate-900 mb-3">{t.feat2Title}</h3>
+                    <p className="text-slate-500 leading-relaxed" dangerouslySetInnerHTML={{ __html: t.feat2Desc }} />
                 </div>
                 <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-slate-50 transition-colors">
                     <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-6 text-amber-600">
                         <Globe className="w-7 h-7" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-3">Google Grounding</h3>
-                    <p className="text-slate-500 leading-relaxed">
-                        If a paper isn't in the database, we use <strong>Google Search</strong> to perform a final forensic sweep of the web.
-                    </p>
+                    <h3 className="text-xl font-bold text-slate-900 mb-3">{t.feat3Title}</h3>
+                    <p className="text-slate-500 leading-relaxed" dangerouslySetInnerHTML={{ __html: t.feat3Desc }} />
                 </div>
             </div>
         </div>
@@ -369,29 +366,13 @@ Example: 'As discussed by Ekman (1999) in his study on basic emotions...'"
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
-
-            {/* 左侧：Logo */}
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
                 <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-md flex items-center justify-center text-white font-bold text-xs">V</div>
                 <span className="font-bold text-slate-100 tracking-tight">Veru</span>
             </div>
-
-            {/* 右侧：版权信息 + GitHub 链接 */}
-            <div className="flex items-center space-x-6">
-                <a
-                  href="https://github.com/Yinghao-Guan/Veru"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
-                  aria-label="View Source on GitHub"
-                >
-                    <Github className="w-5 h-5" />
-                </a>
-                <div className="text-sm border-l border-slate-700 pl-6 ml-2">
-                    &copy; {new Date().getFullYear()} Veru Audit.
-                </div>
+            <div className="text-sm">
+                &copy; {new Date().getFullYear()} Veru Audit. {t.rightsReserved}
             </div>
-
         </div>
       </footer>
     </div>
