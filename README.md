@@ -4,7 +4,7 @@
   <img src="frontend/public/v_logo.svg" alt="Veru Logo" width="120" height="120" />
   <h3>AI Citation Auditor & Hallucination Detector</h3>
   <p>Verify ChatGPT/Claude citations against real academic databases instantly.</p>
-  <a href="https://veru.app"><strong>Visit Live Demo »</strong></a>
+  <a href="https://veru.app"><strong>Visit Live Demo on veru.app »</strong></a>
 </div>
 
 <br />
