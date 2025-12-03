@@ -12,7 +12,8 @@ export const translations = {
 
     // Input Column
     inputLabel: "Input Source",
-    inputSubLabel: "Supports ChatGPT, Claude, Perplexity",
+    inputSubLabel: "Supports ChatGPT, Claude, Gemini",
+    tryExampleBtn: "🎲 Try Example",
     placeholder: "Paste text here...\nExample: 'As discussed by Ekman (1999) in his study on basic emotions...'",
     charCount: "characters",
     checkBtn: "Check Citations",
@@ -77,7 +78,8 @@ export const translations = {
 
     // Input Column
     inputLabel: "输入来源",
-    inputSubLabel: "支持 ChatGPT, Claude, Perplexity",
+    inputSubLabel: "支持 ChatGPT, Claude, Gemini",
+    tryExampleBtn: "🎲 试试示例",
     placeholder: "在此粘贴文本...\n示例：'正如 Ekman (1999) 在其关于基本情绪的研究中所述...'",
     charCount: "字符",
     checkBtn: "开始核查",

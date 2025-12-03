@@ -1,12 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Languages } from 'lucide-react';
+import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Languages, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import HistoryDrawer, { HistoryItem, AuditResult } from '../components/HistoryDrawer';
-import { translations, Language } from '../translations'; // 引入字典
+import { translations, Language } from '../translations';
 
-// Logo 组件
+// 定义示例数据 (经典的三个案例)
+const EXAMPLES = [
+  // Case 1: FAKE (完全虚构)
+  "Zhang, Wei & Miller, J. (2024). 'The Cognitive Impact of Blue Light on Deep Sea Jellyfish Navigation Patterns'. Journal of Marine Psychology. This study reveals that artificial blue light significantly disrupts the circadian rhythms of deep-sea jellyfish.",
+
+  // Case 2: MISMATCH (张冠李戴 - ResNet 煮面条)
+  "'Deep Residual Learning for Image Recognition' by Kaiming He. This paper proposes a new method for cooking spaghetti using neural networks.",
+
+  // Case 3: REAL (真实且年份有争议，展示纠错能力)
+  "Devlin et al., 2018 – “BERT: Pre-training of Deep Bidirectional Transformers”\nPopularized transformer-based language models."
+];
+
 function VeruLogo() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-8 h-8 mr-2">
@@ -22,7 +33,6 @@ function VeruLogo() {
   );
 }
 
-// 审计卡片组件 (增加 t 参数用于汉化 status)
 function AuditCard({ result, t }: { result: AuditResult, t: typeof translations.en }) {
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -35,7 +45,6 @@ function AuditCard({ result, t }: { result: AuditResult, t: typeof translations.
   };
   const config = getStatusConfig(result.status);
 
-  // 获取本地化的 Status 文本
   const localizedStatus = t.status[result.status as keyof typeof t.status] || result.status;
 
   return (
@@ -83,23 +92,22 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<AuditResult[] | null>(null);
 
-  // 语言状态
   const [lang, setLang] = useState<Language>('en');
-  const t = translations[lang]; // 获取当前语言的字典
+  const t = translations[lang];
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  // 自动检测语言
+  // 新增：示例索引，用于轮播
+  const [exampleIndex, setExampleIndex] = useState(0);
+
   useEffect(() => {
-    // 仅在首次加载时检测
     const browserLang = navigator.language.toLowerCase();
     if (browserLang.startsWith('zh')) {
       setLang('zh');
     }
   }, []);
 
-  // 切换语言函数
   const toggleLanguage = () => {
     setLang(prev => prev === 'en' ? 'zh' : 'en');
   };
@@ -132,6 +140,14 @@ export default function Home() {
         setHistory([]);
         localStorage.removeItem('veru_history');
     }
+  };
+
+  // 新增：处理点击“试一试”
+  const handleTryExample = () => {
+    const example = EXAMPLES[exampleIndex];
+    setInputText(example);
+    // 轮播索引 (0 -> 1 -> 2 -> 0)
+    setExampleIndex((prev) => (prev + 1) % EXAMPLES.length);
   };
 
   const handleAudit = async () => {
@@ -169,14 +185,13 @@ export default function Home() {
         onClose={() => setHistoryOpen(false)}
         history={history}
         onClear={clearHistory}
-        t={t} // 传递翻译字典
+        t={t}
         onSelect={(item) => {
             setInputText(item.inputText);
             setResults(item.results);
         }}
       />
 
-      {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center cursor-pointer" onClick={() => window.location.reload()}>
@@ -191,7 +206,6 @@ export default function Home() {
               {t.previewBadge}
             </div>
 
-            {/* 语言切换按钮 */}
             <button
               onClick={toggleLanguage}
               className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-1 font-medium text-sm"
@@ -231,12 +245,24 @@ export default function Home() {
             {/* Left: Input */}
             <div className="flex flex-col h-full">
               <div className="bg-white rounded-2xl shadow-lg border border-slate-200/60 p-1 flex-1 flex flex-col transition-all focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-400 overflow-hidden">
+
+                {/* 🔴 Header with Try Example Button */}
                 <div className="bg-slate-50/50 border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center">
-                    <Search className="w-3.5 h-3.5 mr-2 text-blue-500" />
-                    {t.inputLabel}
-                    </label>
-                    <span className="text-[10px] text-slate-400">{t.inputSubLabel}</span>
+                    <div className="flex items-center space-x-3">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center">
+                            <Search className="w-3.5 h-3.5 mr-2 text-blue-500" />
+                            {t.inputLabel}
+                        </label>
+                    </div>
+
+                    {/* 👇 新增：Try Example 按钮 */}
+                    <button
+                        onClick={handleTryExample}
+                        className="text-xs font-bold text-blue-600 bg-white hover:bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg flex items-center transition-colors shadow-sm"
+                    >
+                        <Sparkles className="w-3 h-3 mr-1.5 text-amber-500" />
+                        {t.tryExampleBtn}
+                    </button>
                 </div>
 
                 <textarea
@@ -268,7 +294,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right: Results */}
+            {/* Right: Results (Unchanged) */}
             <div className="flex flex-col h-full overflow-hidden">
                 <div className="bg-slate-50 rounded-2xl border border-slate-200 flex-1 flex flex-col overflow-hidden relative">
                     <div className="bg-white/80 backdrop-blur border-b border-slate-200 px-4 py-3 flex items-center">
@@ -319,7 +345,7 @@ export default function Home() {
                         )}
 
                         {results && results.map((res, idx) => (
-                            <AuditCard key={idx} result={res} t={t} /> // 传入翻译字典
+                            <AuditCard key={idx} result={res} t={t} />
                         ))}
                     </div>
                 </div>
@@ -329,7 +355,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Feature Section (Below the fold) */}
       <section id="features" className="bg-white border-t border-slate-200 py-20">
         <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
@@ -363,7 +388,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
