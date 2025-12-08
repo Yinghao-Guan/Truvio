@@ -5,6 +5,8 @@ from typing import List, Optional
 import uvicorn
 import re
 import asyncio
+import json
+from fastapi.responses import StreamingResponse
 
 # 引入限流库
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -151,10 +153,9 @@ async def process_single_citation(cit) -> AuditResult:
 
 
 # 主接口
-@app.post("/api/audit", response_model=List[AuditResult])
+@app.post("/api/audit")
 @limiter.limit("10/minute")
 async def audit_citations(request: Request, body: AuditRequest):
-    # 提取引用
     citations = extract_citations_from_text(body.text)
 
     # 安全熔断
@@ -163,11 +164,21 @@ async def audit_citations(request: Request, body: AuditRequest):
         citations = citations[:MAX_CITATIONS]
         print(f"⚠️ Truncated citations to {MAX_CITATIONS} for safety.")
 
-    # 并发执行所有引用的核查任务
-    # 使用 asyncio.gather 同时启动所有任务
-    results = await asyncio.gather(*[process_single_citation(cit) for cit in citations])
+    # 定义一个异步生成器
+    async def result_generator():
+        # 创建任务列表
+        tasks = [process_single_citation(cit) for cit in citations]
 
-    return results
+        # 使用 asyncio.as_completed 迭代，在任一任务完成时立即 yield
+        for task in asyncio.as_completed(tasks):
+            result = await task
+
+            # 将 Pydantic 对象转为 dict 再转为 JSON 字符串
+            # 加上换行符 \n NDJSON 的标准分隔符
+            yield json.dumps(result.dict()) + "\n"
+
+    # 返回流式响应，媒体类型设为 x-ndjson
+    return StreamingResponse(result_generator(), media_type="application/x-ndjson")
 
 
 if __name__ == "__main__":

@@ -153,7 +153,10 @@ export default function Home() {
   const handleAudit = async () => {
     if (!inputText.trim()) return;
     setLoading(true);
-    setResults(null);
+    setResults([]); // 清空旧结果，准备接收新流
+
+    // 用于暂存完整结果以保存历史
+    const collectedResults: AuditResult[] = [];
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -163,16 +166,62 @@ export default function Home() {
         body: JSON.stringify({ text: inputText }),
       });
 
-      const data = await response.json();
-      setResults(data);
+      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.body) throw new Error('No body');
 
-      if (data && data.length > 0) {
-        saveToHistory(inputText, data);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+
+        // 处理 NDJSON (按换行符分割)
+        const lines = buffer.split('\n');
+
+        // 只有最后一行可能是不完整的，保留在 buffer 中
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const newResult = JSON.parse(line) as AuditResult;
+
+              // 实时更新 UI
+              setResults((prev) => {
+                const current = prev || [];
+                return [...current, newResult];
+              });
+
+              collectedResults.push(newResult);
+            } catch (e) {
+              console.error('Error parsing JSON chunk', e);
+            }
+          }
+        }
+      }
+
+      // 处理 buffer 中剩余的内容 (如果有)
+      if (buffer.trim()) {
+         try {
+            const newResult = JSON.parse(buffer) as AuditResult;
+            setResults((prev) => [...(prev || []), newResult]);
+            collectedResults.push(newResult);
+         } catch (e) { /* ignore end garbage */ }
+      }
+
+      // 全部流结束后，保存历史
+      if (collectedResults.length > 0) {
+        saveToHistory(inputText, collectedResults);
       }
 
     } catch (error) {
       console.error('API Error:', error);
-      alert('Unable to connect to the audit server. Please check if the backend is running.');
+      alert('Unable to connect to the audit server or connection lost.');
     } finally {
       setLoading(false);
     }
