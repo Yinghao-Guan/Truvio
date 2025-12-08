@@ -5,6 +5,8 @@ import google.generativeai as genai
 from pydantic import BaseModel
 from typing import List, Optional, Union
 from dotenv import load_dotenv
+import time
+import google.api_core.exceptions
 
 load_dotenv()
 
@@ -19,6 +21,25 @@ class CitationData(BaseModel):
     year: Optional[str] = None  # 虽然这里定义是 str，但在下面代码里会强制转换
     summary_intent: str
     specific_claims: List[str] = []
+
+
+def generate_with_retry(model, prompt):
+    max_attempts = 2  # 1 次失败 + 1 次重试
+    for attempt in range(max_attempts):
+        try:
+            return model.generate_content(prompt)
+
+        except google.api_core.exceptions.ResourceExhausted:
+            # 属于 Vertex AI 的 429 Resource Exhausted
+            if attempt == max_attempts - 1:
+                raise  # 最后一次失败 → 抛出
+
+            wait = 2 ** attempt  # 第一次失败等待 1s
+            print(f"[WARN] 429 Resource Exhausted. {wait}s 后重试第 {attempt + 2} 次调用...")
+            time.sleep(wait)
+
+        except Exception:
+            raise  # 其他错误不属于可重试范围，直接抛出
 
 
 def extract_citations_from_text(text: str) -> List[CitationData]:
@@ -61,7 +82,7 @@ def extract_citations_from_text(text: str) -> List[CitationData]:
     """
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_with_retry(model, prompt)
         raw_content = response.text
 
         # 清洗逻辑
