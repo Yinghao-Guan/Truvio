@@ -29,6 +29,10 @@ app = FastAPI(title="Veru Audit Engine")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+@app.get("/")
+async def health_check():
+    return {"status": "ok", "message": "Veru Audit Engine is running"}
+
 # CORS 配置
 origins = [
     "http://localhost:3000",
