@@ -45,7 +45,7 @@ def generate_with_retry(model, prompt):
 
 def extract_citations_from_text(text: str) -> List[CitationData]:
     print(f"\n[Debug] 正在让 Gemini 提取文本: {text[:50]}...")
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
     prompt = f"""
         You are a forensic text auditor. 

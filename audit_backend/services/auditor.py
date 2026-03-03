@@ -23,7 +23,7 @@ async def verify_content_consistency(user_claim: str, real_abstract: str) -> dic
             "reason": "Paper exists, but abstract is missing in database."
         }
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
     # Prompt 逻辑增强
     prompt = f"""
