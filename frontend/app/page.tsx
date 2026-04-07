@@ -451,6 +451,12 @@ export default function Home() {
             {/* 右侧：GitHub 链接 + 版权信息 */}
             <div className="flex items-center space-x-6">
                 <a
+                  href="mailto:hello@veru.app"
+                  className="text-slate-400 hover:text-white transition-colors text-sm"
+                >
+                    hello@veru.app
+                </a>
+                <a
                   href="https://github.com/Yinghao-Guan/Veru"
                   target="_blank"
                   rel="noopener noreferrer"
