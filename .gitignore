@@ -37,3 +37,7 @@ frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
+
+# others
+docs/data_analytic
+testing_input.txt

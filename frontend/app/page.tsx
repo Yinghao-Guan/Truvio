@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Languages, Sparkles, Github } from 'lucide-react';
+import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Languages, Sparkles, Github, Upload, X, Lock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import HistoryDrawer, { HistoryItem, AuditResult } from '../components/HistoryDrawer';
 import { translations, Language } from '../translations';
@@ -97,6 +97,10 @@ export default function Home() {
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  const [bibModalOpen, setBibModalOpen] = useState(false);
+  const [accessCode, setAccessCode] = useState('');
+  const [accessCodeError, setAccessCodeError] = useState('');
 
   // 示例索引，用于轮播
   const [exampleIndex, setExampleIndex] = useState(0);
@@ -304,14 +308,23 @@ export default function Home() {
                         </label>
                     </div>
 
-                    {/* Try Example 按钮 */}
-                    <button
-                        onClick={handleTryExample}
-                        className="text-xs font-bold text-blue-600 bg-white hover:bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg flex items-center transition-colors shadow-sm"
-                    >
-                        <Sparkles className="w-3 h-3 mr-1.5 text-amber-500" />
-                        {t.tryExampleBtn}
-                    </button>
+                    {/* Buttons */}
+                    <div className="flex items-center space-x-2">
+                        <button
+                            onClick={() => { setAccessCode(''); setAccessCodeError(''); setBibModalOpen(true); }}
+                            className="text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg flex items-center transition-colors shadow-sm"
+                        >
+                            <Upload className="w-3 h-3 mr-1.5 text-blue-500" />
+                            Upload .bib
+                        </button>
+                        <button
+                            onClick={handleTryExample}
+                            className="text-xs font-bold text-blue-600 bg-white hover:bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg flex items-center transition-colors shadow-sm"
+                        >
+                            <Sparkles className="w-3 h-3 mr-1.5 text-amber-500" />
+                            {t.tryExampleBtn}
+                        </button>
+                    </div>
                 </div>
 
                 <textarea
@@ -472,6 +485,69 @@ export default function Home() {
 
         </div>
       </footer>
+
+      {/* .bib Upload Access Code Modal */}
+      {bibModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm mx-4 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Lock className="w-4 h-4 text-blue-600" />
+                </div>
+                <h2 className="text-base font-bold text-slate-800">Upload .bib File</h2>
+              </div>
+              <button
+                onClick={() => setBibModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-500 mb-4">
+              This feature requires an access code. Please enter your code to continue.
+            </p>
+
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">
+              Access Code
+            </label>
+            <input
+              type="password"
+              value={accessCode}
+              onChange={(e) => { setAccessCode(e.target.value); setAccessCodeError(''); }}
+              placeholder="Enter access code"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+            />
+            {accessCodeError && (
+              <p className="text-xs text-rose-500 mt-1.5">{accessCodeError}</p>
+            )}
+
+            <div className="flex space-x-3 mt-5">
+              <button
+                onClick={() => setBibModalOpen(false)}
+                className="flex-1 border border-slate-200 text-slate-600 text-sm font-semibold py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (!accessCode.trim()) {
+                    setAccessCodeError('Please enter an access code.');
+                    return;
+                  }
+                  // TODO: validate access code and handle .bib upload
+                  setAccessCodeError('Invalid access code.');
+                }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center space-x-1.5"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Continue</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
