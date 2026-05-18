@@ -164,15 +164,20 @@ export default function AboutPage() {
                 <Sparkles className="w-3.5 h-3.5" />
                 Coming soon
               </div>
-              <h2 className="text-4xl font-extrabold text-white mb-5 tracking-tight">
+              <h2 className="text-4xl font-extrabold text-white mb-6 tracking-tight">
                 Introducing{' '}
                 <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                   Veru Write
                 </span>
               </h2>
-              <p className="text-slate-300 text-lg leading-relaxed max-w-2xl mx-auto">
-                An AI academic writing assistant that doesn&apos;t just write — it writes with citations you can trust,
-                grounded in real research from the start.
+              <p className="text-xl font-semibold text-white/90 leading-snug max-w-2xl mx-auto mb-4">
+                Write research papers simply.{' '}
+                <span className="text-cyan-300">Submit professionally.</span>{' '}
+                <span className="text-blue-300">Verify automatically.</span>
+              </p>
+              <p className="text-slate-400 leading-relaxed max-w-2xl mx-auto">
+                Veru Write is an AI-powered academic writing tool: write in a simple format,
+                export to LaTeX/PDF, and verify citations before submission.
               </p>
             </div>
 
@@ -180,18 +185,18 @@ export default function AboutPage() {
               {[
                 {
                   icon: PenLine,
-                  title: 'Write with real sources',
-                  desc: 'Veru Write retrieves actual papers as it drafts, so every claim comes with a verified reference baked in.',
-                },
-                {
-                  icon: ShieldCheck,
-                  title: 'Zero hallucinated citations',
-                  desc: 'We run every generated citation through our audit pipeline before it ever reaches your document.',
+                  title: 'Write simply',
+                  desc: 'Draft in plain language or Markdown — no LaTeX required. Veru Write handles structure, headings, and academic register for you.',
                 },
                 {
                   icon: BookOpen,
-                  title: 'Built for academics',
-                  desc: 'Literature reviews, research proposals, thesis sections — Veru Write understands academic register and structure.',
+                  title: 'Submit professionally',
+                  desc: 'One click exports your paper to submission-ready LaTeX or PDF, formatted to journal and conference standards.',
+                },
+                {
+                  icon: ShieldCheck,
+                  title: 'Verify automatically',
+                  desc: 'Every citation is run through Veru Audit before it reaches your document — zero hallucinated references reach submission.',
                 },
               ].map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm hover:bg-white/8 transition-colors">
@@ -209,12 +214,12 @@ export default function AboutPage() {
               <h3 className="text-white font-bold text-lg mb-6">Why Veru Write is different</h3>
               <div className="grid md:grid-cols-2 gap-4">
                 {[
-                  'Cites papers that actually exist',
-                  'Retrieves sources before generating prose',
-                  'Shows you the real abstract, not a paraphrase',
+                  'Write in plain format, not LaTeX',
+                  'One-click export to LaTeX or PDF',
+                  'Citations auto-verified before export',
+                  'Retrieves real sources before generating prose',
                   'Flags uncertainty rather than filling gaps with fiction',
-                  'Seamlessly integrates with Veru Audit for a final check',
-                  'Designed around open-access scholarship',
+                  'Built around open-access scholarship',
                 ].map((point) => (
                   <div key={point} className="flex items-center gap-3 text-slate-300 text-sm">
                     <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
