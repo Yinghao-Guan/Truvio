@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ShieldCheck, Database, Globe, Sparkles, PenLine, BookOpen, ArrowRight, Github, Zap, CheckCircle } from 'lucide-react';
 import WaitlistForm from '../../components/WaitlistForm';
 import PageViewTracker from '../../components/PageViewTracker';
+import SurveyWidget from '../../components/SurveyWidget';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -252,6 +253,8 @@ export default function AboutPage() {
         </section>
 
       </main>
+
+      <SurveyWidget lang="en" />
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Languages, Sparkles, Github } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import HistoryDrawer, { HistoryItem, AuditResult } from '../components/HistoryDrawer';
+import SurveyWidget from '../components/SurveyWidget';
 import { translations, Language } from '../translations';
 import { track } from '@vercel/analytics';
 
@@ -428,6 +429,8 @@ export default function Home() {
             </div>
         </div>
       </section>
+
+      <SurveyWidget lang={lang} />
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">

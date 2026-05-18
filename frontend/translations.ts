@@ -62,7 +62,32 @@ export const translations = {
     fakeDetected: "FAKE DETECTED",
 
     // Footer
-    rightsReserved: "All rights reserved."
+    rightsReserved: "All rights reserved.",
+
+    // Survey Widget
+    surveyNudgeTitle: "Got 1 minute?",
+    surveyNudgeDesc: "Help us build a better Veru — take a quick 4-question survey.",
+    surveyNudgeCta: "Sure, let's go",
+    surveyNudgeDismiss: "Maybe later",
+    surveyTitle: "Quick Survey",
+    surveySubtitle: "4 questions · under 1 minute",
+    surveyProgress: "Question {current} of {total}",
+    surveyNext: "Next",
+    surveyBack: "Back",
+    surveySubmit: "Submit",
+    surveyThanksTitle: "Thank you!",
+    surveyThanksDesc: "Your feedback helps us shape Veru into something truly useful.",
+    surveyClose: "Close",
+    surveySelectMax: "Select up to {max}",
+    surveyOtherPlaceholder: "Please specify...",
+    surveyQ1: "What tool do you usually use to write academic documents?",
+    surveyQ1Options: ["Google Docs", "Microsoft Word", "Overleaf / LaTeX", "Markdown", "Notion", "ChatGPT / Gemini / Claude", "Other"],
+    surveyQ2: "What are your biggest pain points in academic writing? (Choose up to 2)",
+    surveyQ2Options: ["Citation verification", "Finding reliable sources", "Formatting", "LaTeX / Overleaf complexity", "Exporting to PDF / LaTeX", "AI-generated citations", "Collaboration", "Other"],
+    surveyQ3: "If Veru could let you check citations while writing, would you be interested?",
+    surveyQ3Options: ["Yes, I would try it.", "Maybe, depending on the workflow.", "No, I only need citation checking after writing."],
+    surveyQ4: "How would you best describe your role?",
+    surveyQ4Options: ["Undergraduate student", "Graduate student", "Researcher", "Professor / TA", "Other"],
   },
 
   zh: {
@@ -128,7 +153,32 @@ export const translations = {
     fakeDetected: "发现虚假",
 
     // Footer
-    rightsReserved: "保留所有权利。"
+    rightsReserved: "保留所有权利。",
+
+    // Survey Widget
+    surveyNudgeTitle: "花一分钟帮帮我们？",
+    surveyNudgeDesc: "只需回答 4 个问题，帮助我们打造更好的 Veru。",
+    surveyNudgeCta: "好啊，去做",
+    surveyNudgeDismiss: "下次再说",
+    surveyTitle: "快速问卷",
+    surveySubtitle: "4 个问题 · 不到 1 分钟",
+    surveyProgress: "第 {current} 题，共 {total} 题",
+    surveyNext: "下一题",
+    surveyBack: "上一题",
+    surveySubmit: "提交",
+    surveyThanksTitle: "感谢你！",
+    surveyThanksDesc: "你的反馈将帮助我们把 Veru 打造成真正有用的工具。",
+    surveyClose: "关闭",
+    surveySelectMax: "最多选 {max} 项",
+    surveyOtherPlaceholder: "请填写...",
+    surveyQ1: "你通常用什么工具写学术文档？",
+    surveyQ1Options: ["Google Docs", "Microsoft Word", "Overleaf / LaTeX", "Markdown", "Notion", "ChatGPT / Gemini / Claude", "其他"],
+    surveyQ2: "你在学术写作中最大的痛点是什么？（最多选 2 项）",
+    surveyQ2Options: ["引用核查", "寻找可靠来源", "格式排版", "LaTeX / Overleaf 复杂度", "导出为 PDF / LaTeX", "AI 生成的引用", "协作", "其他"],
+    surveyQ3: "如果 Veru 可以让你一边写作、一边自动检查引用，你会感兴趣吗？",
+    surveyQ3Options: ["会，我会试试。", "也许，取决于具体工作流程。", "不，我只需要在写完后检查引用。"],
+    surveyQ4: "你如何描述自己的身份？",
+    surveyQ4Options: ["本科生", "研究生", "研究人员", "教授 / 助教", "其他"],
   }
 };
 
