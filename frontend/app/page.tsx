@@ -443,7 +443,7 @@ export default function Home() {
             </div>
 
             {/* Right: waitlist CTA */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
               <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-5 text-blue-400">
                 <PenLine className="w-6 h-6" />
               </div>
