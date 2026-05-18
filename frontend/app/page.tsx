@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Languages, Sparkles, Github } from 'lucide-react';
+import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, ShieldCheck, Database, Zap, Globe, History, Languages, Sparkles, Github, PenLine, ArrowRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import HistoryDrawer, { HistoryItem, AuditResult } from '../components/HistoryDrawer';
 import SurveyWidget from '../components/SurveyWidget';
+import WaitlistForm from '../components/WaitlistForm';
 import { translations, Language } from '../translations';
 import { track } from '@vercel/analytics';
 
@@ -243,6 +244,9 @@ export default function Home() {
             <a href="#features" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors hidden sm:block">
               {t.howItWorks}
             </a>
+            <a href="/about" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors hidden sm:block">
+              {t.aboutLink}
+            </a>
             <div className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 hidden sm:block">
               {t.previewBadge}
             </div>
@@ -396,6 +400,63 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Veru Write teaser */}
+      <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-20 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 pointer-events-none" aria-hidden>
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+
+            {/* Left: copy */}
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-bold text-cyan-400 bg-cyan-400/10 px-3 py-1.5 rounded-full border border-cyan-400/20 mb-6">
+                <Sparkles className="w-3 h-3" />
+                {t.veruWriteBadge}
+              </div>
+              <h2 className="text-3xl font-extrabold text-white mb-4 tracking-tight">
+                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  {t.veruWriteTitle}
+                </span>
+              </h2>
+              <p className="text-slate-300 leading-relaxed mb-7">
+                {t.veruWriteDesc}
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[t.veruWritePt1, t.veruWritePt2, t.veruWritePt3].map((pt) => (
+                  <li key={pt} className="flex items-center gap-3 text-slate-300 text-sm">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="/about#veru-write"
+                className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                {t.veruWriteLearnMore}
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+
+            {/* Right: waitlist CTA */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-5 text-blue-400">
+                <PenLine className="w-6 h-6" />
+              </div>
+              <h3 className="text-white font-bold text-lg mb-2">Veru Write</h3>
+              <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                Be the first to know when it launches — no spam, just one email.
+              </p>
+              <WaitlistForm location="homepage_write_teaser" />
+            </div>
+
+          </div>
+        </div>
+      </section>
 
       <section id="features" className="bg-white border-t border-slate-200 py-20">
         <div className="max-w-7xl mx-auto px-6">

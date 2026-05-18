@@ -3,6 +3,7 @@ export const translations = {
     // Header
     auditSubtitle: "AI Citation Auditor",
     howItWorks: "How it works",
+    aboutLink: "About",
     previewBadge: "Free Research Preview",
 
     // Hero
@@ -42,6 +43,15 @@ export const translations = {
       SUSPICIOUS: "SUSPICIOUS",
       MINOR_ERROR: "MINOR ERROR"
     },
+
+    // Veru Write teaser
+    veruWriteBadge: "Coming soon",
+    veruWriteTitle: "Introducing Veru Write",
+    veruWriteDesc: "An AI writing assistant that drafts academic content with real, verified sources built in — so you never have to audit citations after the fact.",
+    veruWritePt1: "Retrieves real papers before generating prose",
+    veruWritePt2: "Every citation verified by Veru Audit",
+    veruWritePt3: "Zero hallucinated references",
+    veruWriteLearnMore: "Learn more about Veru Write",
 
     // Features Section
     whyTitle: "Why use Veru?",
@@ -94,6 +104,7 @@ export const translations = {
     // Header
     auditSubtitle: "AI 引用核查工具",
     howItWorks: "工作原理",
+    aboutLink: "关于我们",
     previewBadge: "免费预览版",
 
     // Hero
@@ -133,6 +144,15 @@ export const translations = {
       SUSPICIOUS: "疑似捏造 (SUSPICIOUS)",
       MINOR_ERROR: "轻微错误 (MINOR ERROR)"
     },
+
+    // Veru Write teaser
+    veruWriteBadge: "即将推出",
+    veruWriteTitle: "Veru Write 即将上线",
+    veruWriteDesc: "AI 学术写作助手，在生成内容的同时嵌入真实、可核查的引用——让你无需事后再审查。",
+    veruWritePt1: "先检索真实论文，再生成文本",
+    veruWritePt2: "每条引用均经 Veru Audit 自动核查",
+    veruWritePt3: "零幻觉引用",
+    veruWriteLearnMore: "了解更多关于 Veru Write",
 
     // Features Section
     whyTitle: "为什么选择 Veru？",
