@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description: "Detect fake AI citations instantly.",
   },
   icons: {
-    icon: '/icon',
+    icon: '/v_logo.svg',
   },
   robots: {
     index: true,

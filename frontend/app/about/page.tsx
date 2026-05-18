@@ -12,20 +12,6 @@ export const metadata: Metadata = {
   },
 };
 
-function VeruLogo() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-8 h-8 mr-2">
-      <defs>
-        <linearGradient id="about_logo_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: '#2563EB', stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: '#06B6D4', stopOpacity: 1 }} />
-        </linearGradient>
-      </defs>
-      <rect width="512" height="512" rx="128" fill="url(#about_logo_grad)" />
-      <path d="M140 200 L210 340 L380 140" stroke="white" strokeWidth="64" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 export default function AboutPage() {
   return (
@@ -35,7 +21,7 @@ export default function AboutPage() {
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center">
-            <VeruLogo />
+            <img src="/v_logo.svg" alt="Veru logo" className="w-8 h-8 mr-2" />
             <span className="text-xl font-bold tracking-tight text-slate-900">Veru</span>
           </a>
           <nav className="flex items-center space-x-3">
@@ -268,7 +254,7 @@ export default function AboutPage() {
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
-            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-md flex items-center justify-center text-white font-bold text-xs">V</div>
+            <img src="/v_logo.svg" alt="Veru logo" className="w-6 h-6" />
             <span className="font-bold text-slate-100 tracking-tight">Veru</span>
           </div>
           <div className="flex items-center space-x-6">
