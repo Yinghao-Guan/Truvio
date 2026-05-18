@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ShieldCheck, Database, Globe, Sparkles, PenLine, BookOpen, ArrowRight, Github, Zap, CheckCircle } from 'lucide-react';
 import WaitlistForm from '../../components/WaitlistForm';
+import PageViewTracker from '../../components/PageViewTracker';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -16,6 +17,8 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-slate-800 font-sans flex flex-col">
+
+      <PageViewTracker event="veru_about_page_visit" />
 
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
@@ -96,7 +99,7 @@ export default function AboutPage() {
                   zero hallucinated citations.
                 </p>
                 <div className="relative z-10">
-                  <WaitlistForm />
+                  <WaitlistForm location="hero_card" />
                 </div>
               </div>
 
@@ -225,7 +228,7 @@ export default function AboutPage() {
                 Veru Write is in active development. Be the first to know when it launches.
               </p>
               <div className="flex justify-center">
-                <WaitlistForm />
+                <WaitlistForm location="write_section" />
               </div>
             </div>
           </div>

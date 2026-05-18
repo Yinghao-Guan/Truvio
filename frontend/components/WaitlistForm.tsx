@@ -2,15 +2,40 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Loader2, CheckCircle, X, Sparkles } from 'lucide-react';
+import { track } from '@vercel/analytics';
 
 type State = 'idle' | 'loading' | 'success' | 'duplicate' | 'error';
 
-export default function WaitlistForm() {
+interface Props {
+  location?: string;
+}
+
+export default function WaitlistForm({ location = 'unknown' }: Props) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [state, setState] = useState<State>('idle');
   const [message, setMessage] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Track impression once when button enters the viewport
+  useEffect(() => {
+    const el = buttonRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          track('veru_write_cta_impression', { location });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [location]);
 
   // Focus input when modal opens
   useEffect(() => {
@@ -29,7 +54,6 @@ export default function WaitlistForm() {
 
   const handleClose = () => {
     setOpen(false);
-    // Reset after animation settles
     setTimeout(() => {
       if (state !== 'success' && state !== 'duplicate') {
         setEmail('');
@@ -76,7 +100,11 @@ export default function WaitlistForm() {
     <>
       {/* Trigger button */}
       <button
-        onClick={() => setOpen(true)}
+        ref={buttonRef}
+        onClick={() => {
+          track('veru_write_cta_click', { location });
+          setOpen(true);
+        }}
         className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm active:scale-95 whitespace-nowrap"
       >
         Request early access

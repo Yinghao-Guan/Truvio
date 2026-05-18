@@ -5,6 +5,7 @@ import { BookOpen, AlertCircle, CheckCircle, Search, AlertTriangle, Loader2, Shi
 import ReactMarkdown from 'react-markdown';
 import HistoryDrawer, { HistoryItem, AuditResult } from '../components/HistoryDrawer';
 import { translations, Language } from '../translations';
+import { track } from '@vercel/analytics';
 
 // 定义示例数据 (经典的三个案例)
 const EXAMPLES = [
@@ -86,6 +87,10 @@ export default function Home() {
 
   // 示例索引，用于轮播
   const [exampleIndex, setExampleIndex] = useState(0);
+
+  useEffect(() => {
+    track('veru_check_page_visit');
+  }, []);
 
   useEffect(() => {
     const browserLang = navigator.language.toLowerCase();
