@@ -31,7 +31,7 @@ async def verify_with_google_search(title: str, author: str, claim_summary: str)
             "actual_paper_info": None
         }
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key={API_KEY}"
     headers = {"Content-Type": "application/json"}
 
     async def _post(payload: dict) -> dict:
